@@ -1,0 +1,168 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <title>Strømpris</title>
+    <style>
+      body {
+        margin: 0;
+        font-family: Helvetica, Arial, sans-serif;
+      }
+
+      .error {
+        color: red;
+      }
+      .topnav {
+        overflow: hidden;
+        background-color: #333;
+      }
+
+      .topnav a {
+        float: left;
+        color: #f2f2f2;
+        text-align: center;
+        padding: 14px 16px;
+        text-decoration: none;
+        font-size: 17px;
+      }
+
+      .topnav a:hover {
+        background-color: #69dadb;
+        color: black;
+      }
+
+      .topnav a.active {
+        background-color: #193498;
+        color: white;
+      }
+    </style>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm//vega@5"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm//vega-lite@5.6.0"
+    ></script>
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm//vega-embed@6"
+    ></script>
+  </head>
+  <body>
+
+    <!--- EDITED PART -->
+    <!-- Add Navigation Bar. -->
+    <div class="topnav">
+      <a href="/">Home</a>
+      <a href="/docs">FastAPI Docs</a>
+      <a href="/help">Help</a>
+      <a href="/activity">Activity</a>
+  </div>
+
+    <!-- Add Navigation Bar with links to docs (both FastAPI and your sphinx docs)
+    -->
+
+     <!-- Header and Information -->
+     <header>
+      <h1>Energy Prices in Norway</h1>
+    </header>
+    <section>
+      <p>This graph presents the latest trends in energy prices in various regions in Norway. The data is from Strømpris API.</p>
+    </section>
+
+    <!-- Time Stamp -->
+    <form action="javascript:refreshPlot()" id="price-form">
+
+      <div>
+        <input type="checkbox" id="oslo" name="locations" value="NO1" onchange="refreshPlot()">
+        <label for="oslo">Oslo</label>
+      </div>
+      <div>
+        <input type="checkbox" id="kristiansand" name="locations" value="NO2" onchange="refreshPlot()">
+        <label for="kristiansand">Kristiansand</label>
+      </div>
+      <div>
+        <input type="checkbox" id="trondheim" name="locations" value="NO3" onchange="refreshPlot()">
+        <label for="trondheim">Trondheim</label>
+      </div>
+      <div>
+        <input type="checkbox" id="tromsø" name="locations" value="NO4" onchange="refreshPlot()">
+        <label for="tromsø">Tromsø</label>
+      </div>
+      <div>
+        <input type="checkbox" id="bergen" name="locations" value="NO5" onchange="refreshPlot()">
+        <label for="bergen">Bergen</label>
+      </div>
+
+      <label for="end-date">End Date:</label>
+      <input type="date" id="end-date" name="end" value="2023-01-01" min="2010-01-01" max="2023-12-31" />
+  
+      <label for="num-days">Number of Days:</label>
+      <input type="number" id="num-days" name="days" value="7" min="1" max="30" />
+  
+      <button type="submit">Refresh Plot</button>
+    </form>
+
+    <div id="vis"></div>
+
+    <!-- Create Form -->
+    <form action="javascript:refreshPlot()" id="price-form">
+      <!--
+      -->
+    </form>
+
+    <script type="text/javascript">
+      async function refreshPlot() {
+        // begin constructing URL to request the plot JSON
+        const plotUrl = new URL(
+          `${document.location.protocol}//${document.location.host}/plot_prices.json`,
+        );
+
+        // get inputs from the form
+
+
+        for (checkbox of document.querySelectorAll("input[name=locations]")) {
+          if (checkbox.checked) {
+            plotUrl.searchParams.append("locations", checkbox.value);
+          }
+        }
+        var endInput = document.querySelector('input[name="end"]');
+        if (endInput) {
+          plotUrl.searchParams.append("end", endInput.value);
+        } else {
+          console.warn('No input with name="end"');
+        }
+
+        var daysInput = document.querySelector('input[name="days"]');
+        if (daysInput) {
+          plotUrl.searchParams.append("days", daysInput.value);
+        } else {
+          console.warn('No input with name="days"');
+        }
+
+        console.log(`requesting new chart from ${plotUrl.href}`);
+        var response = await fetch(plotUrl.href);
+        var spec = await response.json();
+
+        var embedOpt = { mode: "vega-lite" };
+
+        function showError(el, error) {
+          el.innerHTML =
+            '<div class="error" style="color:red;">' +
+            "<p>JavaScript Error: " +
+            error.message +
+            "</p>" +
+            "<p>This usually means there's a typo in your chart specification. " +
+            "See the javascript console for the full traceback.</p>" +
+            "</div>";
+          throw error;
+        }
+        const el = document.getElementById("vis");
+        vegaEmbed("#vis", spec, embedOpt).catch((error) =>
+          showError(el, error),
+        );
+      }
+      refreshPlot();
+    </script>
+  </body>
+</html>
