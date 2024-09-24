@@ -1,4 +1,4 @@
-# IN3110 strømpris
+# IN3110 Energy-Price-Analysis-with-FastAPI
 
 ## Introduction to Assignment 5: Energy Price Analysis and Visualization with FastAPI
 This assignment focuses on utilizing Python's data analysis using FastAPI and Altair to build a dynamic webpage. The webpage´s functionality revolves around retrieving, processing, and graphically presenting data on electricity prices in Norway. The tasks completed are 5.1 to 5.6, excluding task 5.4.
